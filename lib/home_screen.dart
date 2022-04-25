@@ -37,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
         items.add(newItem);
         log('items length: ${items.length}');
       });
+
+      titleController.text = "";
+      amountController.text = "";
     }
 
     showPickDate() {}
