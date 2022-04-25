@@ -1,8 +1,8 @@
 class TransactionItem {
-  int amount = 0;
   String title = "";
+  double amount = 0;
   String date = "";
 
-  TransactionItem(this.amount, this.title, this.date);
+  TransactionItem(this.title, this.amount, this.date);
 
 }
