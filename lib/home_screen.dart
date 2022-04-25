@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:bbv_learning_flutter/transaction_item.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,13 +27,19 @@ class _HomeScreenState extends State<HomeScreen> {
     String formattedDate = formatter.format(now);
     dateController.text = formattedDate;
 
+
+    MaterialColor getRandomColor() {
+      return Colors.primaries[Random().nextInt(Colors.primaries.length)];
+    }
+
     addTransaction() {
       Navigator.pop(context);
       setState(() {
         if (titleController.text.isEmpty || amountController.text.isEmpty) return;
+        var randomColor = getRandomColor();
         var newItem = TransactionItem(titleController.text,
             double.parse(amountController.text.toString()),
-            dateController.text);
+            dateController.text, randomColor);
         items.add(newItem);
       });
 
@@ -159,12 +166,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           margin: const EdgeInsets.all(1.0),
                                           padding: const EdgeInsets.all(3.0),
                                           decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.blue)
+                                              border: Border.all(color: items[index].amountColor)
                                           ),
                                           child: Text("\$" +
                                               items[index].amount.toString(),
                                               style: TextStyle(
-                                                color: Colors.blue,
+                                                color: items[index].amountColor,
                                                   fontSize: 20,
                                                   fontWeight: FontWeight.bold),
                                           ),
