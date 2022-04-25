@@ -33,9 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
         var newItem = TransactionItem(titleController.text,
             double.parse(amountController.text.toString()),
             dateController.text);
-        log('newItem: ${newItem.title} - ${newItem.amount}');
         items.add(newItem);
-        log('items length: ${items.length}');
       });
 
       titleController.text = "";
@@ -44,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showPickDate() {}
     onDeleteItem(int itemIndex) {
-      log('onDeleteItem: ${itemIndex}');
       setState(() {
         items.removeAt(itemIndex);
       });
@@ -110,8 +107,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         actions: <Widget>[
           TextButton(
-            onPressed: () {},
-            child: Text('Save'),
+            onPressed: () {showBottomSheetAddTransaction();},
+            child: Text('ADD', style: TextStyle(color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18),),
           ),
         ],
         title: Text('My App'),
