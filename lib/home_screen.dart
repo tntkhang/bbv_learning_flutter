@@ -32,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return Colors.primaries[Random().nextInt(Colors.primaries.length)];
     }
 
+    showPickDate() {}
+
     addTransaction() {
       Navigator.pop(context);
       setState(() {
@@ -47,8 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
       amountController.text = "";
     }
 
-    showPickDate() {}
-    onDeleteItem(int itemIndex) {
+    deleteTransaction(int itemIndex) {
       setState(() {
         items.removeAt(itemIndex);
       });
@@ -72,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Align(
                     alignment: Alignment.center,
                     child: Text("Add Transaction", style: TextStyle(fontSize: 30))),
+                SizedBox(height: 50,),
                 TextField(
                   decoration: InputDecoration(
                       hintText: "Name"
@@ -101,13 +103,80 @@ class _HomeScreenState extends State<HomeScreen> {
                   margin: new EdgeInsets.only(top: 30),
                   child: Align(
                       alignment: Alignment.center,
-                      child: ElevatedButton(onPressed: addTransaction, child: Text("Amount"))),
+                      child: ElevatedButton(onPressed: addTransaction, child: Text("Add"))),
                 )
               ],
             ),
           )
         )
       );
+    }
+
+    Widget _buildChart() {
+      return Container(
+          margin: new EdgeInsets.all(10),
+          child: const Card(
+            elevation: 5,
+            child: Center(
+                child: Text(
+                    'Chart',
+                    style: TextStyle(fontSize: 30)
+                )
+            ),
+          )
+      );
+    }
+
+    Widget _buildTransactionList() {
+      return items.isNotEmpty ? Container(
+          margin: new EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Transaction list",
+                      style: TextStyle(
+                          fontSize: 25, fontWeight: FontWeight.bold))),
+              Expanded(
+                  child: ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                            elevation: 2,
+                            child: ListTile(
+                              leading: Container(
+                                margin: const EdgeInsets.all(1.0),
+                                padding: const EdgeInsets.all(3.0),
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: items[index].amountColor)
+                                ),
+                                child: Text("\$" +
+                                    items[index].amount.toString(),
+                                  style: TextStyle(
+                                      color: items[index].amountColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              title: Text(items[index].title,
+                                  style: TextStyle(fontSize: 20)),
+                              subtitle: Text(items[index].date,
+                                style: TextStyle(fontSize: 14),),
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete),
+                                color: Colors.red,
+                                onPressed: () {
+                                  deleteTransaction(index);
+                                },),
+                            )
+                        );
+                      }
+                  )
+              )
+            ],
+          )
+      ) : Center(child: Text("No transaction added yet"));
     }
 
     return Scaffold(
@@ -129,71 +198,12 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
-                flex: 5,
-                child: Container(
-                    margin: new EdgeInsets.all(10),
-                    child: const Card(
-                      elevation: 5,
-                      child: Center(
-                          child: Text(
-                              'Chart',
-                              style: TextStyle(fontSize: 30)
-                          )
-                      ),
-                    )
-                )
+              flex: 5,
+              child: _buildChart(),
             ),
             Expanded(
               flex: 8,
-              child: Container(
-                  margin: new EdgeInsets.all(10.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Transaction list",
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold))),
-                      Expanded(
-                          child: ListView.builder(
-                              itemCount: items.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Card(
-                                    elevation: 2,
-                                    child: ListTile(
-                                        leading: Container(
-                                          margin: const EdgeInsets.all(1.0),
-                                          padding: const EdgeInsets.all(3.0),
-                                          decoration: BoxDecoration(
-                                              border: Border.all(color: items[index].amountColor)
-                                          ),
-                                          child: Text("\$" +
-                                              items[index].amount.toString(),
-                                              style: TextStyle(
-                                                color: items[index].amountColor,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        title: Text(items[index].title,
-                                            style: TextStyle(fontSize: 20)),
-                                        subtitle: Text(items[index].date,
-                                            style: TextStyle(fontSize: 14),),
-                                        trailing: IconButton(
-                                          icon: Icon(Icons.delete),
-                                          color: Colors.red,
-                                          onPressed: () {
-                                            onDeleteItem(index);
-                                          },),
-                                    )
-                                );
-                              }
-                          )
-                      )
-                    ],
-                  )
-              ),
+              child: _buildTransactionList(),
             )
           ],
         ),
