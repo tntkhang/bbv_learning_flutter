@@ -119,7 +119,7 @@ class Chart extends StatelessWidget {
           maxY: _getMaxY(),
         ),
       ) : const Center(
-        child: Text("Chart is empty"),
+        child: Text("Chart is empty", style: TextStyle(color: Colors.white),),
       )
     );
   }
