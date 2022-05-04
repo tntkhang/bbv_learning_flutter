@@ -5,7 +5,7 @@ class TransactionItem {
   String title = "";
   double amount = 0;
   String date = "";
-  MaterialColor amountColor = Color(0xFF2929FF).toMaterialColor();
+  MaterialColor amountColor = const Color(0xFF2929FF).toMaterialColor();
 
   TransactionItem(this.title, this.amount, this.date, this.amountColor);
 

@@ -1,4 +1,4 @@
-import 'package:bbv_learning_flutter/home_screen.dart';
+import 'package:bbv_learning_flutter/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
