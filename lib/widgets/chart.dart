@@ -1,12 +1,16 @@
 import 'package:bbv_learning_flutter/models/transaction_item.dart';
+import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:bbv_learning_flutter/extensions/date_extension.dart';
 
 class Chart extends StatelessWidget {
-  List<TransactionItem> items;
+  Map<DateTime, List<TransactionItem>> groupByDate;
   List<FlSpot> data;
-  Chart({Key? key, required this.items, required this.data}) : super(key: key);
+  var maxAmount;
+  Chart({Key? key, required this.groupByDate, required this.data, required this.maxAmount}) : super(key: key);
 
   BarTouchData get barTouchData => BarTouchData(
     enabled: false,
@@ -37,7 +41,9 @@ class Chart extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontSize: 10,
     );
-    return Center(child: Text(items[value.toInt()].date, style: style));
+
+    var date = groupByDate.keys.firstWhereIndexedOrNull((index, element) => index == value) ?? DateTime.now();
+    return Center(child: Text(date.formatDate(), style: style));
   }
 
   FlTitlesData get titlesData => FlTitlesData(
@@ -64,15 +70,6 @@ class Chart extends StatelessWidget {
     show: false,
   );
 
-  final _barsGradient = const LinearGradient(
-    colors: [
-      Colors.lightBlueAccent,
-      Colors.greenAccent,
-    ],
-    begin: Alignment.bottomCenter,
-    end: Alignment.topCenter,
-  );
-
   List<BarChartGroupData> _buildChartData() {
     List<BarChartGroupData> result = [];
     for (var value in data) {
@@ -81,7 +78,7 @@ class Chart extends StatelessWidget {
         barRods: [
           BarChartRodData(
             toY: value.y,
-            gradient: _barsGradient,
+            color: Colors.lightBlueAccent,
           )
         ],
         showingTooltipIndicators: [0],
@@ -91,16 +88,6 @@ class Chart extends StatelessWidget {
   }
 
   List<BarChartGroupData> get barGroups => _buildChartData();
-
-  double _getMaxY() {
-    var result = items[0].amount;
-    for (var value in items) {
-      if (value.amount > result) {
-        result = value.amount;
-      }
-    }
-    return result + 180;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +103,7 @@ class Chart extends StatelessWidget {
           barGroups: barGroups,
           gridData: FlGridData(show: false),
           alignment: BarChartAlignment.spaceAround,
-          maxY: _getMaxY(),
+          maxY: maxAmount + 200,
         ),
       ) : const Center(
         child: Text("Chart is empty", style: TextStyle(color: Colors.white),),

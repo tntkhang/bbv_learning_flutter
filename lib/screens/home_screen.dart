@@ -1,12 +1,15 @@
-import 'dart:developer';
 import 'dart:math';
 
-import 'package:bbv_learning_flutter/components/chart.dart';
+import 'package:bbv_learning_flutter/extensions/date_extension.dart';
 import 'package:bbv_learning_flutter/models/transaction_item.dart';
+import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
+
+import '../widgets/chart.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,22 +26,20 @@ final dateController = TextEditingController();
 class _HomeScreenState extends State<HomeScreen> {
   var now = DateTime.now();
   var formatter = DateFormat('yyyy-MM-dd');
-  var lastSeletedDate;
+  var lastSelectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-
-    lastSeletedDate = now;
     String formattedDate = formatter.format(now);
     dateController.text = formattedDate;
   }
 
-  MaterialColor getRandomColor() {
+  MaterialColor _getRandomColor() {
     return Colors.primaries[Random().nextInt(Colors.primaries.length)];
   }
 
-  void showPickDate() {
+  void _showDatePicker() {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext builder) {
@@ -48,10 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.date,
             onDateTimeChanged: (value) {
-              dateController.text = formatter.format(value);
-              lastSeletedDate = value;
+              dateController.text = value.formatDate();
+              lastSelectedDate = value;
             },
-            initialDateTime: lastSeletedDate,
+            maximumDate: DateTime.now(),
+            initialDateTime: lastSelectedDate,
           ),
         );
       }
@@ -59,23 +61,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   addTransaction() {
-    Navigator.pop(context);
-    setState(() {
-      if (titleController.text.isEmpty || amountController.text.isEmpty) return;
-      var randomColor = getRandomColor();
-      var newItem = TransactionItem(titleController.text,
-          double.parse(amountController.text.toString()),
-          dateController.text, randomColor);
-      items.add(newItem);
-    });
+      setState(() {
+        var randomColor = _getRandomColor();
+        var newItem = TransactionItem(titleController.text,
+            double.parse(amountController.text.toString()),
+            lastSelectedDate, randomColor);
+        items.add(newItem);
+        items.sort((from, to) => from.date.compareTo(to.date));
+      });
+      Navigator.pop(context);
 
-    titleController.text = "";
-    amountController.text = "";
+      titleController.text = "";
+      amountController.text = "";
   }
 
-  deleteTransaction(int itemIndex) {
+  deleteTransaction(TransactionItem itemIndex) {
     setState(() {
-      items.removeAt(itemIndex);
+      items.remove(itemIndex);
     });
   }
 
@@ -112,14 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 40,),
                   CupertinoTextField(
                     suffix: IconButton(
-                      onPressed: () {showPickDate();},
+                      onPressed: () {_showDatePicker();},
                       icon: const Icon(Icons.date_range),
                     ),
                     readOnly: true,
                     placeholder: "Date",
                     keyboardType: TextInputType.datetime,
                     controller: dateController,
-                    onTap: () {showPickDate();},
+                    onTap: () {_showDatePicker();},
                   ),
                   Container(
                     margin: const EdgeInsets.only(top: 20),
@@ -137,11 +139,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildChart() {
     List<FlSpot> data = [];
     double index = 0;
-    for (var value in items) {
-      data.add(FlSpot(index, value.amount));
+    double maxAmount = 0.0;
+
+    var groupByDate = items.groupListsBy((obj) => obj.date);
+
+    debugPrint("groupByDate: " + groupByDate.toString());
+
+    for (var value in groupByDate.keys) {
+      var totalAmount = 0.0;
+      groupByDate[value]?.forEach((element) {
+         totalAmount+= element.amount;
+      });
+      if (totalAmount > maxAmount) {
+        maxAmount = totalAmount;
+      }
+      data.add(FlSpot(index, totalAmount));
       index++;
     }
-    return Chart(items: items, data: data);
+    return Chart(groupByDate: groupByDate, data: data, maxAmount: maxAmount);
   }
 
   Widget _buildTransactionList() {
@@ -156,40 +171,48 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                         fontSize: 25, fontWeight: FontWeight.bold))),
             Expanded(
-                child: ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                          elevation: 2,
-                          child: ListTile(
-                            leading: Container(
-                              margin: const EdgeInsets.all(1.0),
-                              padding: const EdgeInsets.all(3.0),
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: items[index].amountColor)
-                              ),
-                              child: Text("\$" +
-                                  items[index].amount.toString(),
-                                style: TextStyle(
-                                    color: items[index].amountColor,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            title: Text(items[index].title,
-                                style: const TextStyle(fontSize: 20)),
-                            subtitle: Text(items[index].date,
-                              style: const TextStyle(fontSize: 14),),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              color: Colors.red,
-                              onPressed: () {
-                                deleteTransaction(index);
-                              },),
-                          )
-                      );
-                    }
-                )
+              child: GroupedListView<dynamic, String>(
+                elements: items,
+                groupBy: (element) => (element.date as DateTime).formatDate(),
+                groupSeparatorBuilder: (String value) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                itemBuilder: (context, dynamic element) => Card(
+                    elevation: 2,
+                    child: ListTile(
+                      leading: Container(
+                        margin: const EdgeInsets.all(1.0),
+                        padding: const EdgeInsets.all(3.0),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: element.amountColor)
+                        ),
+                        child: Text("\$" +
+                            element.amount.toString(),
+                          style: TextStyle(
+                              color: element.amountColor,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      title: Text(element.title,
+                          style: const TextStyle(fontSize: 20)),
+                      subtitle: Text((element.date as DateTime).formatDate(),
+                        style: const TextStyle(fontSize: 14),),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        color: Colors.red,
+                        onPressed: () {
+                          deleteTransaction(element);
+                        },),
+                    )
+                ),
+                order: GroupedListOrder.ASC,
+              )
             )
           ],
         )
