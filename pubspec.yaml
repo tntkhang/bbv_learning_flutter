@@ -38,6 +38,7 @@ dependencies:
   material_color_gen: ^2.0.0
   fl_chart: ^0.50.1
   grouped_list: ^4.2.0
+  flutter_platform_widgets: ^1.20.0
 
 dev_dependencies:
   flutter_test:

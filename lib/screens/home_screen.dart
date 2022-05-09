@@ -2,10 +2,13 @@ import 'dart:math';
 
 import 'package:bbv_learning_flutter/extensions/date_extension.dart';
 import 'package:bbv_learning_flutter/models/transaction_item.dart';
+import 'package:bbv_learning_flutter/screens/setting_screen.dart';
+import 'package:bbv_learning_flutter/screens/transaction_detail.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 
@@ -20,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 List<TransactionItem> items = <TransactionItem>[];
 final titleController = TextEditingController();
+final desController = TextEditingController();
 final amountController = TextEditingController();
 final dateController = TextEditingController();
 
@@ -65,14 +69,15 @@ class _HomeScreenState extends State<HomeScreen> {
         var randomColor = _getRandomColor();
         var newItem = TransactionItem(titleController.text,
             double.parse(amountController.text.toString()),
-            lastSelectedDate, randomColor);
+            lastSelectedDate, randomColor, desController.text);
         items.add(newItem);
         items.sort((from, to) => from.date.compareTo(to.date));
       });
       Navigator.pop(context);
 
-      titleController.text = "";
-      amountController.text = "";
+      titleController.text = '';
+      amountController.text = '';
+      desController.text = '';
   }
 
   deleteTransaction(TransactionItem itemIndex) {
@@ -100,39 +105,72 @@ class _HomeScreenState extends State<HomeScreen> {
                       alignment: Alignment.center,
                       child: Text("Add Transaction", style: TextStyle(fontSize: 30))),
                   const SizedBox(height: 50,),
-                  CupertinoTextField(
-                    placeholder: "Name",
+                  PlatformTextField(
+                    hintText: "Name",
                     keyboardType: TextInputType.text,
                     controller: titleController,
                   ),
                   const SizedBox(height: 40,),
-                  CupertinoTextField(
-                    placeholder: "Amount",
+                  PlatformTextField(
+                    hintText: "Amount",
                     keyboardType: TextInputType.number,
                     controller: amountController,
                   ),
                   const SizedBox(height: 40,),
-                  CupertinoTextField(
-                    suffix: IconButton(
-                      onPressed: () {_showDatePicker();},
-                      icon: const Icon(Icons.date_range),
-                    ),
-                    readOnly: true,
-                    placeholder: "Date",
-                    keyboardType: TextInputType.datetime,
-                    controller: dateController,
-                    onTap: () {_showDatePicker();},
+                  PlatformTextField(
+                    hintText: "Description",
+                    keyboardType: TextInputType.text,
+                    controller: desController,
+                    minLines: 5,
+                    maxLines: 10,
                   ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    child:  CupertinoTextField(
+                      suffix: IconButton(
+                        onPressed: () {_showDatePicker();},
+                        icon: const Icon(Icons.date_range),
+                      ),
+                      readOnly: true,
+                      keyboardType: TextInputType.datetime,
+                      controller: dateController,
+                      onTap: () {_showDatePicker();},
+                    ),
+                  ),
+
                   Container(
                     margin: const EdgeInsets.only(top: 20),
                     child: Align(
                         alignment: Alignment.center,
-                        child: CupertinoButton(onPressed: addTransaction, child: const Text("Add"))),
+                        child: PlatformTextButton(onPressed: addTransaction, child: const Text("Add"))),
                   )
                 ],
               ),
             )
         )
+    );
+  }
+
+  _goToDetailScreen(TransactionItem item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TransactionDetailScreen(transactionTitle: item.title, transactionDes: item.description,)),
+    );
+  }
+
+  _goToHomeScreen() {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
+
+  _goToSettingScreen() {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingScreen()),
     );
   }
 
@@ -170,6 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text("Transaction list",
                     style: TextStyle(
                         fontSize: 25, fontWeight: FontWeight.bold))),
+            const SizedBox(height: 16,),
             Expanded(
               child: GroupedListView<dynamic, String>(
                 elements: items,
@@ -183,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 itemBuilder: (context, dynamic element) => Card(
-                    elevation: 2,
+                    elevation: 8,
                     child: ListTile(
                       leading: Container(
                         margin: const EdgeInsets.all(1.0),
@@ -209,6 +248,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           deleteTransaction(element);
                         },),
+                      onTap: () {
+                        _goToDetailScreen(element as TransactionItem);
+                      },
                     )
                 ),
                 order: GroupedListOrder.ASC,
@@ -222,18 +264,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          CupertinoButton(
+    return PlatformScaffold(
+      appBar: PlatformAppBar(
+        trailingActions: <Widget>[
+          PlatformTextButton(
             onPressed: () {showBottomSheetAddTransaction();},
-            child: const Text('ADD', style: TextStyle(color: Colors.white,
+            child: PlatformText('ADD', style: const TextStyle(color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 18),),
+                fontSize: 15),),
           ),
         ],
-        title: const Text('My App'),
-        centerTitle: false,
+        title: PlatformText('My App'),
       ),
       body: Container(
         color: Colors.white,
@@ -251,13 +292,44 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showBottomSheetAddTransaction();
-        },
-        backgroundColor: Colors.purple,
-        child: const Icon(Icons.add),
-      ),
+      material: (_, __)  => MaterialScaffoldData(
+        drawer: Drawer(
+          // Add a ListView to the drawer. This ensures the user can scroll
+          // through the options in the drawer if there isn't enough vertical
+          // space to fit everything.
+          child: ListView(
+            // Important: Remove any padding from the ListView.
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Center(child: Text('Expense Notes')),
+              ),
+              ListTile(
+                title: const Center(child: Text('Home')),
+                onTap: () {
+                  _goToHomeScreen();
+                },
+              ),
+              ListTile(
+                title: const Center(child: Text('Settings')),
+                onTap: () {
+                  _goToSettingScreen();
+                },
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showBottomSheetAddTransaction();
+          },
+          backgroundColor: Colors.blue,
+          child: const Icon(Icons.add),
+        ),
+      )
     );
   }
 }
