@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.bold))));
   }
 
-  showBottomSheetAddEditTransaction([TransactionItem? item]) {
+  void showBottomSheetAddEditTransaction([TransactionItem? item]) {
     if (item != null) {
       titleController.text = item.title;
       amountController.text = item.amount.toString();
@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
             )));
   }
 
-  _goToDetailScreen(TransactionItem item) {
+  void _goToDetailScreen(TransactionItem item) {
     Navigator.pushNamed(context, ScreenKeys.itemDetail, arguments: {
       'transactionTitle': item.title,
       'transactionDes': item.description
