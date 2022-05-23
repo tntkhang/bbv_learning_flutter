@@ -1,10 +1,7 @@
 import 'dart:math';
 
 import 'package:bbv_learning_flutter/extensions/date_extension.dart';
-import 'package:bbv_learning_flutter/extensions/string_extension.dart';
 import 'package:bbv_learning_flutter/models/transaction_item.dart';
-import 'package:bbv_learning_flutter/screens/setting_screen.dart';
-import 'package:bbv_learning_flutter/screens/transaction_detail_screen.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,7 +14,6 @@ import 'package:uuid/uuid.dart';
 import '../utils/screen_keys.dart';
 import '../widgets/chart.dart';
 import '../widgets/app_drawer.dart';
-import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -48,73 +44,21 @@ class _HomeScreenState extends State<HomeScreen> {
     return Colors.primaries[Random().nextInt(Colors.primaries.length)];
   }
 
-  // void showDatePicker() async {
-  //     DateTime? temp = await showPlatformDatePicker(
-  //       context: context,
-  //       firstDate: DateTime(DateTime.now().year - 2),
-  //       initialDate: DateTime.now(),
-  //       lastDate: DateTime(DateTime.now().year + 2),
-  //       builder: (context, child) => Theme(
-  //         data: Theme.of(context).copyWith(
-  //           primaryColor: const Color(0xFF8CE7F1),
-  //           accentColor: const Color(0xFF8CE7F1),
-  //           colorScheme: ColorScheme.fromSwatch(
-  //             primarySwatch: Colors.purple,
-  //             brightness: Theme.of(context).brightness,
-  //           ),
-  //         ),
-  //         child: child ?? const SizedBox.shrink(),
-  //       ),
-  //     );
-  //     if (temp != null) {
-  //       setState(() => {
-  //           dateController.text = temp.formatDate();
-  //           lastSelectedDate = temp;
-  //         }
-  //       );
-  //     }
-  // }
+  void _showDatePicker() async {
+    DateTime? temp = await showPlatformDatePicker(
+      context: context,
+      firstDate: DateTime(1950),
+      initialDate: lastSelectedDate,
+      lastDate: DateTime.now(),
+    );
 
-  void _showDatePicker() {
-    showCupertinoModalPopup(
-        context: context,
-        builder: (BuildContext builder) {
-          return Container(
-            height: MediaQuery.of(context).copyWith().size.height * 0.25,
-            color: Colors.white,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.date,
-              onDateTimeChanged: (value) {
-                dateController.text = value.formatDate();
-                lastSelectedDate = value;
-              },
-              maximumDate: DateTime.now(),
-              initialDateTime: lastSelectedDate,
-            ),
-          );
-        });
-
-    // DateTime? temp = await showPlatformDatePicker(
-    //   context: context,
-    //   firstDate: DateTime(DateTime.now().year - 2),
-    //   initialDate: DateTime.now(),
-    //   lastDate: DateTime(DateTime.now().year + 2),
-    //   builder: (context, child) => Theme(
-    //     data: Theme.of(context).copyWith(
-    //       primaryColor: const Color(0xFF8CE7F1),
-    //       accentColor: const Color(0xFF8CE7F1),
-    //       colorScheme: ColorScheme.fromSwatch(
-    //         primarySwatch: Colors.purple,
-    //         brightness: Theme.of(context).brightness,
-    //       ),
-    //     ),
-    //     child: child ?? const SizedBox.shrink(),
-    //   ),
-    // );
-    // if (temp != null) setState(() => date = temp);
+    if (temp != null) {
+      dateController.text = temp.formatDate();
+      lastSelectedDate = temp;
+    }
   }
 
-  addTransaction() {
+  void _addTransaction() {
     var randomColor = _getRandomColor();
     var uuid = const Uuid();
 
@@ -133,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _resetEditText();
   }
 
-  deleteTransaction(TransactionItem itemIndex) {
+  void _deleteTransaction(TransactionItem itemIndex) {
     setState(() {
       items.remove(itemIndex);
     });
@@ -145,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
     desController.text = '';
   }
 
-  editTransaction(String itemId, String newTitle, double newAmount,
+  void _editTransaction(String itemId, String newTitle, double newAmount,
       String newDes) {
     setState(() {
       var item = items.firstWhere((element) => element.id == itemId);
@@ -162,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Align(
         alignment: Alignment.center,
         child: PlatformTextButton(
-            onPressed: () => (item == null) ? addTransaction() : editTransaction(
+            onPressed: () => (item == null) ? _addTransaction() : _editTransaction(
                 item.id,
                 titleController.text,
                 double.parse(amountController.text.toString()),
@@ -225,19 +169,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Container(
                     margin: const EdgeInsets.only(top: 20),
-                    child: CupertinoTextField(
-                      suffix: IconButton(
-                        onPressed: () {
-                          _showDatePicker();
-                        },
-                        icon: const Icon(Icons.date_range),
-                      ),
+                    child: PlatformTextField(
                       readOnly: true,
                       keyboardType: TextInputType.datetime,
                       controller: dateController,
                       onTap: () {
                         _showDatePicker();
                       },
+                      material: (_, __) => MaterialTextFieldData(
+                        decoration: const InputDecoration(
+                          suffixIcon: Icon(Icons.date_range),
+                        ),
+                      ),
                     ),
                   ),
                   Container(
@@ -278,20 +221,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTransactionList() {
     return items.isNotEmpty
         ? Container(
-            margin: const EdgeInsets.all(10.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Transaction list",
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold))),
-                const SizedBox(
-                  height: 16,
-                ),
-                Expanded(
-                    child: GroupedListView<dynamic, String>(
+        margin: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Transaction list",
+                    style: TextStyle(
+                        fontSize: 25, fontWeight: FontWeight.bold))),
+            const SizedBox(
+              height: 16,
+            ),
+            Expanded(
+                child: GroupedListView<dynamic, String>(
                   elements: items,
                   groupBy: (element) => (element.date as DateTime).formatDate(),
                   groupSeparatorBuilder: (String value) => Padding(
@@ -339,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 icon: const Icon(Icons.delete),
                                 color: Colors.red,
                                 onPressed: () {
-                                  deleteTransaction(element);
+                                  _deleteTransaction(element);
                                 },
                               )
                             ],
@@ -351,8 +294,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       )),
                   order: GroupedListOrder.ASC,
                 ))
-              ],
-            ))
+          ],
+        ))
         : const Center(child: Text("No transaction added yet"));
   }
 
