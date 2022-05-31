@@ -1,8 +1,9 @@
-import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:provider/provider.dart';
 
+import '../utils/theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/labeled_radio.dart';
 
@@ -18,12 +19,13 @@ ThemeMode _themeKey = ThemeMode.system;
 class _SettingScreenState extends State<SettingScreen> {
 
   void setThemeKey(ThemeMode themeKey) {
+    ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
     if (themeKey == ThemeMode.dark) {
-      EasyDynamicTheme.of(context).changeTheme(dark: true);
+      themeNotifier.setTheme(ThemeMode.dark);
     } else if (themeKey == ThemeMode.light) {
-      EasyDynamicTheme.of(context).changeTheme(dark: false);
+      themeNotifier.setTheme(ThemeMode.light);
     } else {
-      EasyDynamicTheme.of(context).changeTheme(dynamic: true);
+      themeNotifier.setTheme(ThemeMode.system);
     }
     setState(() {
       _themeKey = themeKey;

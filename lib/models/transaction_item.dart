@@ -1,5 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:material_color_gen/material_color_gen.dart';
+
+
+List<TransactionItem> listTransFromJson(String str) => List<TransactionItem>.from(json.decode(str).map((x) => TransactionItem.fromJson(x)));
+
+String listTransToJson(List<TransactionItem> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class TransactionItem {
   String id = '';
@@ -18,4 +24,62 @@ class TransactionItem {
     date = item.date;
     amountColor = item.amountColor;
   }
+  factory TransactionItem.fromJson(Map<String, dynamic> json) => TransactionItem(
+    json["id"],
+    json["title"],
+    json["amount"],
+    json["date"],
+    json["amountColor"],
+    json["description"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "amount": amount,
+    "id": id,
+    "title": title,
+    "description": description,
+    "date": date,
+    "amountColor": amountColor,
+  };
+
+  toString() {
+    return "id: " + id +
+        ", title: " + title +
+        ", amount: " + amount.toString() +
+        ", description: " + description +
+        ", date: " + date.toString() +
+        ", amountColor: " + amountColor.toString();
+  }
+  //
+  // factory TransactionItem.fromFirestore(
+  //     DocumentSnapshot<Map<String, dynamic>> snapshot,
+  //     SnapshotOptions? options,
+  //     ) {
+  //   final data = snapshot.data();
+  //   return TransactionItem(
+  //     id: data?['id'],
+  //     title: data?['title'],
+  //     amount: data?['amount'],
+  //     description: data?['description'],
+  //     date: data?['date'],
+  //     amountColor: data?['amountColor'],
+  //   );
+  // }
+  //
+  Map<String, dynamic> toFirestore() => {
+      "fields": {
+        "datetime": {
+          "stringValue": date.toString()
+        },
+        "amount": {
+          "integerValue": amount
+        },
+        "name": {
+          "stringValue": title
+        },
+        "description": {
+          "stringValue": description
+        }
+      }
+    };
 }

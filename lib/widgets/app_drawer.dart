@@ -1,4 +1,4 @@
-import 'package:bbv_learning_flutter/screens/home_screen.dart';
+import 'package:bbv_learning_flutter/screens/home/home_screen.dart';
 import 'package:bbv_learning_flutter/utils/screen_keys.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,20 +12,25 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         children: [
           const DrawerHeader(
-            child: Center(child: Text('Expense Notes')),
+            child: Center(child: Text('Expense Notes'), ),
+            decoration: BoxDecoration(color: Colors.blue),
           ),
-          ListTile(title: const Text('Home'), onTap: () => _navScreen(context, ScreenKeys.home)),
-          ListTile(title: const Text('Settings'), onTap: () => _navScreen(context, ScreenKeys.setting))
+          ListTile(title: const Align(
+            alignment: Alignment.center,
+            child: Text('Home'),
+          ), onTap: () => _navScreen(context, ScreenKeys.home)),
+          ListTile(title: const Align(alignment: Alignment.center,
+              child: Text('Settings')
+          ), onTap: () => _navScreen(context, ScreenKeys.setting))
         ],
       ),
     );
   }
 
   _navScreen(BuildContext context, String pageName) {
-    Navigator.pop(context);
     if (pageName != currentScreen) {
       currentScreen = pageName;
-      return Navigator.pushNamed(context, pageName);
+      return Navigator.pushReplacementNamed(context, pageName);
     }
   }
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "39646121884",
+    "project_id": "bbv-learning-flutter",
+    "storage_bucket": "bbv-learning-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39646121884:android:45ad5e60a34b60a8a50259",
+        "android_client_info": {
+          "package_name": "com.example.bbv_learning_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "39646121884-aujfm2rjn161vv294th13257qj3e8lqt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWInX5SyDjpS8llnkdWzMAayHE43yZbDs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "39646121884-aujfm2rjn161vv294th13257qj3e8lqt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
