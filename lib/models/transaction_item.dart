@@ -50,22 +50,6 @@ class TransactionItem {
         ", date: " + date.toString() +
         ", amountColor: " + amountColor.toString();
   }
-  //
-  // factory TransactionItem.fromFirestore(
-  //     DocumentSnapshot<Map<String, dynamic>> snapshot,
-  //     SnapshotOptions? options,
-  //     ) {
-  //   final data = snapshot.data();
-  //   return TransactionItem(
-  //     id: data?['id'],
-  //     title: data?['title'],
-  //     amount: data?['amount'],
-  //     description: data?['description'],
-  //     date: data?['date'],
-  //     amountColor: data?['amountColor'],
-  //   );
-  // }
-  //
   Map<String, dynamic> toFirestore() => {
       "fields": {
         "datetime": {

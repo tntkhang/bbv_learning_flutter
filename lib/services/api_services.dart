@@ -6,20 +6,22 @@ import 'package:http/http.dart';
 import '../models/transaction_item.dart';
 
 class APISerivce {
+  final String webApiKey = 'AIzaSyAWInX5SyDjpS8llnkdWzMAayHE43yZbDs';
+  final String firebaseAuthenUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=';
+  final String dbUrl = 'https://firestore.googleapis.com/v1/projects/bbv-learning-flutter/databases/(default)/documents/transactions';
 
-  final webApiKey = 'AIzaSyAWInX5SyDjpS8llnkdWzMAayHE43yZbDs';
+  final int SUCCESS = 200;
 
   String idToken = '';
 
   Future<AuthenModel?> loginToFirebase() async {
     print('>>>>>>> loginToFirebase <<<<<<<');
-    String url = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$webApiKey';
     Map<String, String> headers = {"Content-type": "application/json"};
     String body = '{"returnSecureToken": true}';
-    Response response = await post(Uri.parse(url), headers: headers, body: body);
+    Response response = await post(Uri.parse('$firebaseAuthenUrl$webApiKey'), headers: headers, body: body);
     int statusCode = response.statusCode;
 
-    if (statusCode == 200) {
+    if (statusCode == SUCCESS) {
       String body = response.body;
       AuthenModel authenModel = AuthenModel.fromJson(json.decode(response.body));
       idToken = authenModel.idToken;
@@ -32,31 +34,25 @@ class APISerivce {
   }
 
   postTransaction(TransactionItem transactionItem) async {
-    String url = 'https://firestore.googleapis.com/v1/projects/bbv-learning-flutter/databases/(default)/documents/transactions';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': 'Bearer $idToken',
     };
     String bodyRequest = jsonEncode(transactionItem.toFirestore());
-    Response response = await post(Uri.parse(url), headers: headers, body: bodyRequest);
+    Response response = await post(Uri.parse(dbUrl), headers: headers, body: bodyRequest);
     int statusCode = response.statusCode;
-    String body = response.body;
-
-    if (statusCode == 200) {
+    if (statusCode == SUCCESS) {
       String body = response.body;
-      AuthenModel authenModel = AuthenModel.fromJson(json.decode(response.body));
-      idToken = authenModel.idToken;
+      print('>>>> Sync Transaction success');
     } else {
       print('>>>>>>> request error: ${response.body.toString()}');
     }
   }
 
   Future<List<TransactionItem>> getTransactions() async {
-    String url = 'https://firestore.googleapis.com/v1/projects/bbv-learning-flutter/databases/(default)/documents/transactions';
-
-    Response res = await get(Uri.parse(url));
-    if (res.statusCode == 200) {
+    Response res = await get(Uri.parse(dbUrl));
+    if (res.statusCode == SUCCESS) {
       List<dynamic> body = jsonDecode(res.body);
 
       List<TransactionItem> posts = body

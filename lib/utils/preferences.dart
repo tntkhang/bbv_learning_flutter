@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ThemePreferences {
+class Preferences {
   static const PREF_KEY_CURRENT_THEME = "pref_key_current_theme";
 
   setThemePref(String value) async {

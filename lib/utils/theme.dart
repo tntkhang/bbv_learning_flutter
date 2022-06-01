@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:bbv_learning_flutter/utils/theme_preferences.dart';
+import 'package:bbv_learning_flutter/utils/preferences.dart';
 
 final darkThemeData = ThemeData(
       primaryColor: Colors.purple,
