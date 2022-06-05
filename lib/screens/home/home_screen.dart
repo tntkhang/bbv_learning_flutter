@@ -16,7 +16,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../utils/screen_keys.dart';
+import '../../utils/screen_routes.dart';
 import 'chart.dart';
 import '../../widgets/app_drawer.dart';
 
@@ -29,20 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<TransactionItem> items = [];
-  late APISerivce _apiSerivce;
-  AuthenModel? loadingAuthen = null;
-
-  @override
-  void initState() {
-    super.initState();
-    _authenFirebase();
-  }
-
-  void _authenFirebase() async {
-    _apiSerivce = APISerivce();
-    loadingAuthen = await _apiSerivce.loginToFirebase();
-    setState((){});
-  }
+  final APISerivce _apiSerivce = APISerivce();
 
   void _addTransaction(TransactionItem newItem) {
     setState(() {
@@ -61,12 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _deleteTransaction(TransactionItem item) {
     setState(() {
+      _apiSerivce.deleteTransaction(item);
       items.remove(item);
     });
   }
 
   void _goToDetailScreen(TransactionItem item) {
-    Navigator.pushNamed(context, ScreenKeys.itemDetail, arguments: {
+    Navigator.pushNamed(context, ScreenRoutes.itemDetail, arguments: {
       'transactionTitle': item.title,
       'transactionDes': item.description
     });
@@ -143,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         title: PlatformText('My App'),
       ),
-      body: (loadingAuthen == null) ? const Center(child:CircularProgressIndicator()) : Column(
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Expanded(

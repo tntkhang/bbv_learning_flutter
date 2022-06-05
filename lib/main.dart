@@ -1,9 +1,11 @@
-import 'package:bbv_learning_flutter/models/transaction_item.dart';
+import 'package:bbv_learning_flutter/screens/authen/authen_screen.dart';
+import 'package:bbv_learning_flutter/screens/flash_screen.dart';
 import 'package:bbv_learning_flutter/screens/home/home_screen.dart';
 import 'package:bbv_learning_flutter/screens/setting_screen.dart';
 import 'package:bbv_learning_flutter/screens/transaction_detail_screen.dart';
-import 'package:bbv_learning_flutter/utils/screen_keys.dart';
+import 'package:bbv_learning_flutter/utils/screen_routes.dart';
 import 'package:bbv_learning_flutter/utils/theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
@@ -22,18 +24,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
-    return MaterialApp(
+    return PlatformApp(
       title: 'Flutter Demo',
-      initialRoute: ScreenKeys.home,
+      localizationsDelegates: const [
+        DefaultMaterialLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      initialRoute: ScreenRoutes.flash,
       routes: {
-        ScreenKeys.home: (context) => const HomeScreen(),
-        ScreenKeys.setting: (context) => const SettingScreen(),
-        ScreenKeys.itemDetail: (context) => const TransactionDetailScreen(),
+        ScreenRoutes.flash: (context) => const FlashScreen(),
+        ScreenRoutes.home: (context) => const HomeScreen(),
+        ScreenRoutes.login: (context) => const AuthenScreen(),
+        ScreenRoutes.setting: (context) => const SettingScreen(),
+        ScreenRoutes.itemDetail: (context) => const TransactionDetailScreen(),
       },
       debugShowCheckedModeBanner: false,
-      theme: lightThemeData,
-      darkTheme: darkThemeData,
-      themeMode: themeNotifier.getTheme(),
+      material: (_, __) => MaterialAppData(
+        theme: lightThemeData,
+        darkTheme: darkThemeData,
+        themeMode: themeNotifier.getTheme(),
+      ),
     );
   }
 }

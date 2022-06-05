@@ -18,6 +18,16 @@ ThemeMode _themeKey = ThemeMode.system;
 
 class _SettingScreenState extends State<SettingScreen> {
 
+  @override
+  void initState() {
+    super.initState();
+    ThemeNotifier().getThemePref().then((value) => {
+      setState(() {
+      _themeKey = value;
+      })
+    });
+  }
+
   void setThemeKey(ThemeMode themeKey) {
     ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
     if (themeKey == ThemeMode.dark) {

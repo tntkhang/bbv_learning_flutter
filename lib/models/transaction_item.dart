@@ -48,7 +48,7 @@ class TransactionItem {
         ", amount: " + amount.toString() +
         ", description: " + description +
         ", date: " + date.toString() +
-        ", amountColor: " + amountColor.toString();
+        ", amountColor: " + amountColor.value.toString();
   }
   Map<String, dynamic> toFirestore() => {
       "fields": {
@@ -63,6 +63,9 @@ class TransactionItem {
         },
         "description": {
           "stringValue": description
+        },
+        "amountColor": {
+          "integerValue": amountColor.value
         }
       }
     };

@@ -103,7 +103,7 @@ class Chart extends StatelessWidget {
           barGroups: barGroups,
           gridData: FlGridData(show: false),
           alignment: BarChartAlignment.spaceAround,
-          maxY: maxAmount + 200,
+          maxY: maxAmount + (maxAmount/6),
         ),
       ) : const Center(
         child: Text("Chart is empty", style: TextStyle(color: Colors.white),),

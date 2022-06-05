@@ -1,23 +1,28 @@
+import 'package:bbv_learning_flutter/models/authen_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class Preferences {
-  static const PREF_KEY_CURRENT_THEME = "pref_key_current_theme";
+  static const PREF_KEY_AUTHEN_MODE = "pref_key_authen_model";
+  static const PREF_KEY_ID_TOKEN = "pref_key_id_token";
 
-  setThemePref(String value) async {
+  setAuthenToken(AuthenModel authenModel) async {
+    print('>>> jsonAuthem saved: ${authenModel.toJson2().toString()}');
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(PREF_KEY_CURRENT_THEME, value);
+    sharedPreferences.setString(PREF_KEY_ID_TOKEN, authenModel.idToken);
   }
 
-  Future<ThemeMode> getThemePref() async {
+  clearAuthenToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var savedTheme = sharedPreferences.getString(PREF_KEY_CURRENT_THEME);
-    if (savedTheme == ThemeMode.dark.name) {
-      return ThemeMode.dark;
-    } else if (savedTheme == ThemeMode.light.name) {
-      return ThemeMode.light;
-    } else {
-      return ThemeMode.system;
-    }
+    sharedPreferences.remove(PREF_KEY_ID_TOKEN);
+  }
+
+  Future<String?> getAuthenToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var jsonAuthenModel = sharedPreferences.getString(PREF_KEY_ID_TOKEN);
+
+    print('>>> jsonAuthem: $jsonAuthenModel');
+    return jsonAuthenModel != null ? jsonAuthenModel : null;
   }
 }
