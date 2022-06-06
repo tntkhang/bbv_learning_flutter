@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:bbv_learning_flutter/models/authen_model.dart';
+import 'package:bbv_learning_flutter/utils/preferences.dart';
 import 'package:http/http.dart';
 
 import '../models/transaction_item.dart';
@@ -18,9 +19,6 @@ class APISerivce {
   final String firebaseAuthenUrl = 'https://identitytoolkit.googleapis.com/v1/accounts';
   final String dbUrl = 'https://firestore.googleapis.com/v1/projects/bbv-learning-flutter/databases/(default)/documents/transactions';
 
-  String idToken = '';
-
-
   Stream<dynamic> loginAnonymous() async* {
     print('>>>>>>> loginAnonymous <<<<<<<');
     Map<String, String> headers = {"Content-type": "application/json"};
@@ -33,7 +31,6 @@ class APISerivce {
       String body = response.body;
 
       AuthenModel authenModel = AuthenModel.fromJson(json.decode(response.body));
-      idToken = authenModel.idToken;
       print('>> body: $body');
       yield authenModel;
     } else {
@@ -53,8 +50,6 @@ class APISerivce {
     if (statusCode == ResponseCode.Success) {
       String body = response.body;
       AuthenModel authenModel = AuthenModel.fromJson(json.decode(body));
-      idToken = authenModel.idToken;
-      print('>> body: $body');
       yield authenModel;
     } else {
       print('>>>>>>> request error: ${response.body.toString()}');
@@ -71,8 +66,7 @@ class APISerivce {
 
     if (statusCode == ResponseCode.Success) {
       String body = response.body;
-      AuthenModel authenModel = AuthenModel.fromJson(json.decode(response.body));
-      idToken = authenModel.idToken;
+      AuthenModel authenModel = AuthenModel.fromJson(json.decode(body));
       print('>> body: $body');
       yield authenModel;
     } else {
@@ -81,52 +75,64 @@ class APISerivce {
     }
   }
 
-  postTransaction(TransactionItem transactionItem) async {
+  Map<String, String> _getBearerHeader(String idToken) => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': 'Bearer $idToken',
+  };
+
+  Stream<dynamic> postTransaction(TransactionItem transactionItem) async* {
     String bodyRequest = jsonEncode(transactionItem.toFirestore());
-    Response response = await post(Uri.parse(dbUrl), headers: _getAuthenHeader(), body: bodyRequest);
-    int statusCode = response.statusCode;
-    if (statusCode == ResponseCode.Success) {
-      String body = response.body;
-      print('>>>> Sync Transaction success');
-    } else {
-      print('>>>>>>> request error: ${response.body.toString()}');
+
+    var idToken = await Preferences().getAuthenToken();
+    if (idToken != null) {
+      yield APIStatus.LOADING;
+      Response response = await post(Uri.parse(dbUrl), headers: _getBearerHeader(idToken), body: bodyRequest);
+      int statusCode = response.statusCode;
+      if (statusCode == ResponseCode.Success) {
+        String body = response.body;
+        TransactionItem transactionItem = TransactionItem.fromFireStore(json.decode(body));
+        print('>>>> Sync Transaction success');
+        yield transactionItem;
+      } else {
+        print('>>>>>>> request error: ${response.body.toString()}');
+        yield APIStatus.ERROR;
+      }
     }
   }
 
-  deleteTransaction(TransactionItem transactionItem) async {
-    String bodyRequest = jsonEncode(transactionItem.toFirestore());
-    Response response = await delete(Uri.parse(dbUrl), headers: _getAuthenHeader(), body: bodyRequest);
-    int statusCode = response.statusCode;
-    if (statusCode == ResponseCode.Success) {
-      String body = response.body;
-      print('>>>> Sync Transaction success');
-    } else {
-      print('>>>>>>> request error: ${response.body.toString()}');
+  Stream<dynamic> deleteTransaction(TransactionItem transactionItem) async* {
+    var idToken = await Preferences().getAuthenToken();
+    if (idToken != null) {
+      yield APIStatus.LOADING;
+      Response response = await delete(Uri.parse("$dbUrl/${transactionItem.firestoreId}"), headers: _getBearerHeader(idToken));
+      int statusCode = response.statusCode;
+      if (statusCode == ResponseCode.Success) {
+        print('>>>> Sync Transaction success');
+        yield APIStatus.SUCCESS;
+      } else {
+        print('>>>>>>> request error: ${response.body.toString()}');
+        yield APIStatus.ERROR;
+      }
     }
   }
 
-  Future<List<TransactionItem>> getTransactions() async {
-    Response res = await get(Uri.parse(dbUrl), headers: _getAuthenHeader());
-    if (res.statusCode == ResponseCode.Success) {
-      List<dynamic> body = jsonDecode(res.body);
+  Stream<List<TransactionItem>> getTransactions() async* {
+    var idToken = await Preferences().getAuthenToken();
+    if (idToken != null) {
+      Response res = await get(Uri.parse(dbUrl), headers: _getBearerHeader(idToken));
+      if (res.statusCode == ResponseCode.Success) {
+        String body = res.body;
 
-      List<TransactionItem> posts = body
-          .map(
-            (dynamic item) => TransactionItem.fromJson(item),
-          )
-          .toList();
+        List<TransactionItem> listTransFromFirestore =
+            List<TransactionItem>.from(json.decode(body)['documents'].map((x) =>
+                TransactionItem.fromFireStore(x))
+            );
 
-      return posts;
-    } else {
-      throw "Unable to retrieve posts.";
+        yield listTransFromFirestore;
+      } else {
+        throw "Unable to retrieve posts.";
+      }
     }
-  }
-
-  Map<String, String> _getAuthenHeader() {
-    return {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $idToken',
-    };
   }
 }

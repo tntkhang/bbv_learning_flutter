@@ -12,9 +12,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:grouped_list/grouped_list.dart';
-import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../utils/screen_routes.dart';
 import 'chart.dart';
@@ -31,12 +29,27 @@ class _HomeScreenState extends State<HomeScreen> {
   List<TransactionItem> items = [];
   final APISerivce _apiSerivce = APISerivce();
 
+  @override
+  void initState() {
+    super.initState();
+    _apiSerivce.getTransactions().listen((event) {
+      setState(() {
+        items = event;
+      });
+    });
+  }
+
   void _addTransaction(TransactionItem newItem) {
     setState(() {
       items.add(newItem);
       items.sort((from, to) => from.date.compareTo(to.date));
     });
-    _apiSerivce.postTransaction(newItem);
+    _apiSerivce.postTransaction(newItem).listen((event) {
+      if (event is TransactionItem) {
+        var item = items.firstWhereOrNull((element) => element.id == event.id);
+        item?.update(event);
+      }
+    });
   }
 
   void _editTransaction(TransactionItem newItem) {
@@ -48,8 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _deleteTransaction(TransactionItem item) {
     setState(() {
-      _apiSerivce.deleteTransaction(item);
       items.remove(item);
+    });
+    _apiSerivce.deleteTransaction(item).listen((event) {
+      if (event == APIStatus.SUCCESS) {
+        Fluttertoast.showToast(
+            msg: "Delete success !",
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.green,
+        );
+      }
     });
   }
 

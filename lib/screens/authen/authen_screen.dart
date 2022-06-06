@@ -38,11 +38,8 @@ class _AuthenScreenState extends State<AuthenScreen> {
         Fluttertoast.showToast(
             msg: "Error: Login fail !",
             toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 2,
             backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0
         );
         loadingAuthen = false;
         setState(() {});
