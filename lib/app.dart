@@ -9,7 +9,7 @@ import 'package:bbv_learning_flutter/screens/transaction_detail_screen.dart';
 import 'package:bbv_learning_flutter/services/authen_repository.dart';
 import 'package:bbv_learning_flutter/utils/screen_routes.dart';
 import 'package:bbv_learning_flutter/utils/theme.dart';
-import 'package:bbv_learning_flutter/utils/theme_cubit.dart';
+import 'package:bbv_learning_flutter/utils/theme_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,16 +24,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<ThemeBloc>(
-          create: (_) => ThemeBloc(),
-        ),
-        BlocProvider<AuthenBloc>(
-          create: (_) => AuthenBloc(const AuthenState.unknow(), authenRepo),
-        ),
-      ],
-      child: const AppView(),
+    return RepositoryProvider<AuthenRepository>(
+      create: (context) => authenRepo,
+      child: BlocProvider<AuthenBloc>(
+        create: (_) => AuthenBloc(const AuthenState.unknow(), authenRepo),
+        child: const AppView(),
+      ),
     );
   }
 }
@@ -47,42 +43,42 @@ class AppView extends StatefulWidget {
 }
 
 class _AppViewState extends State<AppView> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  NavigatorState get _navigator => _navigatorKey.currentState!;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ThemeBloc, ThemeData>(
-        builder: (_, theme) {
-          return PlatformApp(
-            title: 'Flutter Demo',
-            localizationsDelegates: const [
-              DefaultMaterialLocalizations.delegate,
-              DefaultCupertinoLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-            ],
-            routes: {
-              ScreenRoutes.setting: (context) => const SettingScreen(),
-              ScreenRoutes.itemDetail: (
-                  context) => const TransactionDetailScreen(),
-            },
-            debugShowCheckedModeBanner: false,
-            material: (_, __) =>
-                MaterialAppData(
-                  theme: theme,
-                ),
-            home: BlocListener<AuthenBloc, AuthenState>(
-                listener: (context, state) {
-                  switch (state.status) {
-                    case AuthenStatus.authenticated:
-                      const HomeScreen();
-                      break;
-                    default:
-                      AuthenScreen();
-                  }
-                },
-              child: AuthenScreen(),
-            ),
-          );
-        }
+    return PlatformApp(
+      navigatorKey: _navigatorKey,
+      title: 'Flutter Demo',
+      localizationsDelegates: const [
+        DefaultMaterialLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return BlocListener<AuthenBloc, AuthenState>(
+          listener: (context, state) {
+            switch (state.status) {
+              case AuthenStatus.authenticated:
+                _navigator.pushAndRemoveUntil<void>(HomeScreen.route(), (route) => false);
+                break;
+              case AuthenStatus.unauthenticated:
+                _navigator.pushAndRemoveUntil<void>(AuthenScreen.route(), (route) => false);
+                break;
+              default:
+                break;
+            }
+          },
+          child: child
+        );
+      },
+      onGenerateRoute: (_) => AuthenScreen.route(),
+      // material: (_, __) =>
+      //     MaterialAppData(
+      //       theme: theme,
+      //     ),
     );
   }
 }

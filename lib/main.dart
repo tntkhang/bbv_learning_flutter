@@ -8,13 +8,7 @@ import 'app_bloc_observer.dart';
 
 void main() {
   final apiService = APISerivce();
-  //
-  // runApp(MyApp(
-  //   authenRepo: AuthenRepository(apiService),
-  // ));
-
-  BlocOverrides.runZoned(
-        () => runApp(MyApp(authenRepo: AuthenRepository(apiService))),
-    blocObserver: AppBlocObserver(),
-  );
+  runApp(MyApp(
+    authenRepo: AuthenRepository(apiService)
+  ));
 }

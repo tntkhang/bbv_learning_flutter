@@ -12,12 +12,15 @@ class AuthenRepository {
   final String webApiKey = 'AIzaSyAWInX5SyDjpS8llnkdWzMAayHE43yZbDs';
   final String firebaseAuthenUrl = 'https://identitytoolkit.googleapis.com/v1/accounts';
 
-  final _controller = StreamController<AuthenStatus>.broadcast();
+  final _controller = StreamController<AuthenStatus>();
   APISerivce apiService;
 
   AuthenRepository(APISerivce this.apiService);
 
-  Stream<AuthenStatus> get status => _controller.stream;
+  Stream<AuthenStatus> get status async* {
+    yield AuthenStatus.unauthenticated;
+    yield* _controller.stream;
+  }
 
   Future<void> loginWithEmail(String email, String password) async {
     Map<String, String> headers = {"Content-type": "application/json"};
@@ -25,18 +28,17 @@ class AuthenRepository {
     // yield APIStatus.LOADING;
     Response response = await post(Uri.parse('$firebaseAuthenUrl:signInWithPassword?key=$webApiKey'), headers: headers, body: body);
     int statusCode = response.statusCode;
-print('>>>>> $statusCode');
+
+    print('>>>>> $statusCode');
     if (statusCode == ResponseCode.Success) {
       String body = response.body;
-      //AuthenModel authenModel = AuthenModel.fromJson(json.decode(body));
+      AuthenModel authenModel = AuthenModel.fromJson(json.decode(body));
       // yield authenModel;
-      _controller.sink.add(AuthenStatus.authenticated);
-
-      print('>>>>> $statusCode 1111');
-      //return Future.value(AuthenStatus.authenticated);
+      _controller.add(AuthenStatus.authenticated);
+      // return Future.value(AuthenStatus.authenticated);
     } else {
-      _controller.sink.add(AuthenStatus.unauthenticated);
-      //return Future.value(AuthenStatus.unauthenticated);
+      _controller.add(AuthenStatus.unauthenticated);
+      // return Future.value(AuthenStatus.unauthenticated);
     }
   }
 

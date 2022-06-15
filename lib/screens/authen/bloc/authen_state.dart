@@ -6,12 +6,11 @@ import '../../../services/authen_repository.dart';
 
 class AuthenState extends Equatable {
   final AuthenStatus status;
-
-  // final AuthenModel authenModel;
+  final AuthenModel? authenModel;
 
   const AuthenState._({
     this.status = AuthenStatus.unknown,
-    // this.authenModel = AuthenModel.empty
+    this.authenModel
   });
 
   const AuthenState.unknow() : this._(status: AuthenStatus.unknown);

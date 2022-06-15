@@ -13,52 +13,46 @@ class AuthenBloc extends Bloc<AuthenEvent, AuthenState> {
 
   AuthenBloc(AuthenState initialState, this.authenRepo) : super(initialState) {
     on<LoginEvent>(_login);
-    on<SignUpEvent>(
-        (event, emit) {
-          authenRepo.signUpWithEmail(event.email, event.password);
-        }
-    );
+    on<SignUpEvent>(_register);
+
+    on<AuthenStatusChanged>(_authenStatusChanged);
 
     _authenStatusSub = authenRepo.status.listen((status) {
-      (status) => _onAuthenticationStatusChanged(status);
+      // (status) {
+      //   print('>>>>> authenRepo.status; $status 1111');
+      // };
+      (status) => add(AuthenStatusChanged(status));
     });
   }
 
-  void login() {
-
-  }
-
-  void _onAuthenticationStatusChanged(AuthenStatus status) async {
-    switch (status) {
+  void _authenStatusChanged(event, emit) async {
+    print('>>>>> _authenStatusChanged ${event.status}');
+    switch (event.status) {
       case AuthenStatus.unauthenticated:
         emit(const AuthenState.unauthenticated());
         break;
       case AuthenStatus.authenticated:
-         emit(const AuthenState.authenticated());
-         break;
+        emit(const AuthenState.authenticated());
+        break;
       default:
-         emit(const AuthenState.unknow());
-         break;
+        emit(const AuthenState.unknow());
+        break;
     }
   }
 
-  void dispose() {
-    authenRepo.dispose();
-    _authenStatusSub.cancel();
+  FutureOr<void> _register(event, emit) {
+    authenRepo.signUpWithEmail(event.email, event.password);
   }
 
   FutureOr<void> _login(LoginEvent event, Emitter<AuthenState> emit) async {
-    await authenRepo.loginWithEmail(event.email, event.password);
-    // switch (status) {
-    //   case AuthenStatus.unauthenticated:
-    //     emit(const AuthenState.unauthenticated());
-    //     break;
-    //   case AuthenStatus.authenticated:
-    //      emit(const AuthenState.authenticated());
-    //      break;
-    //   default:
-    //      emit(const AuthenState.unknow());
-    //      break;
-    // }
+    authenRepo.loginWithEmail(event.email, event.password);
+    // _onAuthenticationStatusChanged(status);
+  }
+
+  @override
+  Future<void> close() {
+    authenRepo.dispose();
+    _authenStatusSub.cancel();
+    return super.close();
   }
 }

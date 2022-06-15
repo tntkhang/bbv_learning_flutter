@@ -7,6 +7,10 @@ import 'bloc/authen_bloc.dart';
 import 'bloc/authen_event.dart';
 
 class AuthenScreen extends StatelessWidget {
+  static Route route() {
+    return MaterialPageRoute<void>(builder: (_) => AuthenScreen());
+  }
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 

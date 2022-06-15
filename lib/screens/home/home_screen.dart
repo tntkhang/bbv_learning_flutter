@@ -21,6 +21,10 @@ import '../../widgets/app_drawer.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
+  static Route route() {
+    return MaterialPageRoute<void>(builder: (_) => HomeScreen());
+  }
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
