@@ -19,8 +19,9 @@ class APISerivce {
   final String firebaseAuthenUrl = 'https://identitytoolkit.googleapis.com/v1/accounts';
   final String dbUrl = 'https://firestore.googleapis.com/v1/projects/bbv-learning-flutter/databases/(default)/documents/transactions';
 
+
+
   Stream<dynamic> loginAnonymous() async* {
-    print('>>>>>>> loginAnonymous <<<<<<<');
     Map<String, String> headers = {"Content-type": "application/json"};
     String body = '{"returnSecureToken": true}';
     yield APIStatus.LOADING;
@@ -31,16 +32,13 @@ class APISerivce {
       String body = response.body;
 
       AuthenModel authenModel = AuthenModel.fromJson(json.decode(response.body));
-      print('>> body: $body');
       yield authenModel;
     } else {
-      print('>>>>>>> request error: ${response.body.toString()}');
       yield APIStatus.ERROR;
     }
   }
 
   Stream<dynamic> loginWithEmail(String email, String password) async* {
-    print('>>>>>>> loginWithEmail <<<<<<<');
     Map<String, String> headers = {"Content-type": "application/json"};
     String body = '{"email": "$email", "password": "$password", "returnSecureToken": true}';
     yield APIStatus.LOADING;
@@ -52,12 +50,10 @@ class APISerivce {
       AuthenModel authenModel = AuthenModel.fromJson(json.decode(body));
       yield authenModel;
     } else {
-      print('>>>>>>> request error: ${response.body.toString()}');
       yield APIStatus.ERROR;
     }
   }
   Stream<dynamic> signUpWithEmail(String email, String password) async* {
-    print('>>>>>>> loginWithEmail <<<<<<<');
     Map<String, String> headers = {"Content-type": "application/json"};
     String body = '{"email": "$email", "password": "$password", "returnSecureToken": true}';
     yield APIStatus.LOADING;
@@ -67,10 +63,8 @@ class APISerivce {
     if (statusCode == ResponseCode.Success) {
       String body = response.body;
       AuthenModel authenModel = AuthenModel.fromJson(json.decode(body));
-      print('>> body: $body');
       yield authenModel;
     } else {
-      print('>>>>>>> request error: ${response.body.toString()}');
       yield APIStatus.ERROR;
     }
   }
@@ -92,10 +86,8 @@ class APISerivce {
       if (statusCode == ResponseCode.Success) {
         String body = response.body;
         TransactionItem transactionItem = TransactionItem.fromFireStore(json.decode(body));
-        print('>>>> Sync Transaction success');
         yield transactionItem;
       } else {
-        print('>>>>>>> request error: ${response.body.toString()}');
         yield APIStatus.ERROR;
       }
     }
@@ -108,10 +100,8 @@ class APISerivce {
       Response response = await delete(Uri.parse("$dbUrl/${transactionItem.firestoreId}"), headers: _getBearerHeader(idToken));
       int statusCode = response.statusCode;
       if (statusCode == ResponseCode.Success) {
-        print('>>>> Sync Transaction success');
         yield APIStatus.SUCCESS;
       } else {
-        print('>>>>>>> request error: ${response.body.toString()}');
         yield APIStatus.ERROR;
       }
     }

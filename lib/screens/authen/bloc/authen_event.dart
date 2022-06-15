@@ -13,6 +13,4 @@ class SignUpEvent extends AuthenEvent {
   SignUpEvent(this.email, this.password);
 }
 
-class LoginAnonymousEvent extends AuthenEvent {}
-
 class LogoutEvent extends AuthenEvent {}

@@ -1,61 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'bloc/authen_bloc.dart';
+import 'bloc/authen_event.dart';
 
-import '../../utils/screen_routes.dart';
-import './authen_bloc.dart';
-import 'authen_event.dart';
-import 'authen_state.dart';
-
-class AuthenScreen extends StatefulWidget {
-  const AuthenScreen({Key? key}) : super(key: key);
-
-  @override
-  State<AuthenScreen> createState() => _AuthenScreenState();
-}
-
-class _AuthenScreenState extends State<AuthenScreen> {
+class AuthenScreen extends StatelessWidget {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  final bloc = AuthenBloc();
-  var loadingAuthen = false;
 
-  @override
-  void initState() {
-    super.initState();
-    print('>>>>> _AuthenScreenState initState');
-    bloc.stateController.stream.listen((event) {
-      print('>>>>> stateController: ${event.toString()}');
+  AuthenScreen({Key? key}) : super(key: key);
 
-      if (event.authenState == AState.LOADING) {
-        loadingAuthen = true;
-        setState(() {});
-      } else if (event.authenState == AState.SIGNED_IN) {
-        Navigator.pushReplacementNamed(context, ScreenRoutes.home);
-      } else {
-        Fluttertoast.showToast(
-            msg: "Error: Login fail !",
-            toastLength: Toast.LENGTH_LONG,
-            timeInSecForIosWeb: 2,
-            backgroundColor: Colors.red,
-        );
-        loadingAuthen = false;
-        setState(() {});
-      }
-    });
-  }
-
-  void authenWithAccount() {
+  void authenWithAccount(BuildContext context) {
     var email = emailController.text;
     var password = passwordController.text;
-    bloc.eventController.sink.add(LoginEvent(email, password));
+    context.read<AuthenBloc>().add(LoginEvent('khang.tran@bbv.vn', '123a@A'));
   }
-  void registerNewAccount(){
+
+  void registerNewAccount(BuildContext context){
     var email = emailController.text;
     var password = passwordController.text;
-    bloc.eventController.sink.add(SignUpEvent(email, password));
+    context.read<AuthenBloc>().add(SignUpEvent(email, password));
   }
 
   @override
@@ -94,7 +60,7 @@ class _AuthenScreenState extends State<AuthenScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-                child: loadingAuthen ? SizedBox(
+                child: false ? SizedBox(
                   child: Center (child: Lottie.asset('assets/lottie/leaf-loading-animation.json'),),
                   height: 100.0,
                   width: 100.0,
@@ -120,23 +86,23 @@ class _AuthenScreenState extends State<AuthenScreen> {
                       child: TextField(
                         controller: emailController,
                         decoration: const InputDecoration(
-                            suffix: Icon(FontAwesomeIcons.envelope,color: Colors.black,),
-                            labelText: "Email Address",
-                            labelStyle: TextStyle(
-                                color: Colors.black
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey, width: 0.0),
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                              borderSide: BorderSide(color: Colors.black ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                              borderSide: BorderSide(color: Colors.black ),
-                            ),
+                          suffix: Icon(FontAwesomeIcons.envelope,color: Colors.black,),
+                          labelText: "Email Address",
+                          labelStyle: TextStyle(
+                              color: Colors.black
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey, width: 0.0),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            borderSide: BorderSide(color: Colors.black ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            borderSide: BorderSide(color: Colors.black ),
+                          ),
                         ),
                       ),
                     ),
@@ -148,10 +114,10 @@ class _AuthenScreenState extends State<AuthenScreen> {
                         obscureText: true,
                         controller: passwordController,
                         decoration: const InputDecoration(
-                            suffix: Icon(FontAwesomeIcons.eyeSlash,color: Colors.black,),
-                            labelText: "Password",
+                          suffix: Icon(FontAwesomeIcons.eyeSlash,color: Colors.black,),
+                          labelText: "Password",
                           labelStyle: TextStyle(
-                                color: Colors.black
+                              color: Colors.black
                           ),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey, width: 0.0),
@@ -170,7 +136,7 @@ class _AuthenScreenState extends State<AuthenScreen> {
                     ),
                     const SizedBox(height: 30,),
                     GestureDetector(
-                      onTap: authenWithAccount,
+                      onTap: () => authenWithAccount(context),
                       child: Container(
                         alignment: Alignment.center,
                         width: 250,
@@ -196,13 +162,13 @@ class _AuthenScreenState extends State<AuthenScreen> {
                     ),
                     const SizedBox(height: 17 ,),
                     GestureDetector(
-                      onTap: registerNewAccount,
+                      onTap: () => registerNewAccount(context),
                       child: Container(
                         alignment: Alignment.center,
                         width: 250,
                         decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(50)),
-                            border: Border.all(color: Colors.amber),
+                          borderRadius: const BorderRadius.all(Radius.circular(50)),
+                          border: Border.all(color: Colors.amber),
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(12.0),
